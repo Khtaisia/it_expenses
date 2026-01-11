@@ -25,7 +25,10 @@ SECRET_KEY = 'django-insecure-74m5f16rx@-g+04r7&n$!r0ei4c@3phd4(n+p%xndbo03gu6rs
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'it-expenses.onrender.com',
+    '127.0.0.1'
+]
 
 
 # Application definition
@@ -55,7 +58,7 @@ ROOT_URLCONF = 'it_expenses.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],  # ← ДОБАВЬТЕ ЭТУ СТРОКУ
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
