@@ -1,0 +1,50 @@
+/* style.css */
+
+/* Общий стиль страницы */
+body {
+    font-family: Arial, sans-serif;
+    margin: 40px;
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+/* Заголовки */
+h1 {
+    color: #2c3e50;
+}
+
+p {
+    font-size: 16px;
+}
+
+/* Таблица */
+table {
+    width: 60%; /* ширина таблицы */
+    border-collapse: collapse;
+    margin-top: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* лёгкая тень */
+}
+
+/* Заголовки таблицы */
+th {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px;
+    text-align: left;
+}
+
+/* Ячейки таблицы */
+td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+/* Чередование строк */
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+/* Подсветка строки при наведении */
+tr:hover {
+    background-color: #e2f0d9;
+}
