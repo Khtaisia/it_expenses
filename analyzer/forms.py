@@ -1,51 +1,45 @@
 from django import forms
-from .models import Project, Technology, ProjectTechnology
+from .models import Project, Technology
 
 class ProjectTechnologyForm(forms.Form):
-    # Существующий проект
     existing_project = forms.ModelChoiceField(
         queryset=Project.objects.all(),
         required=False,
         label="Выбрать существующий проект"
     )
-    # Новый проект
     new_project = forms.CharField(
         max_length=200,
         required=False,
         label="Или ввести новый проект"
     )
-    # Существующая технология
-    existing_technology = forms.ModelChoiceField(
-        queryset=Technology.objects.all(),
-        required=False,
-        label="Выбрать существующую технологию"
-    )
-    # Новая технология
-    new_technology = forms.CharField(
-        max_length=100,
-        required=False,
-        label="Или ввести новую технологию"
-    )
-    # Категория для новой технологии
-    new_category = forms.CharField(
-        max_length=100,
-        required=False,
-        label="Категория новой технологии (язык, фреймворк, БД и т.д.)"
-    )
 
+    # 🔹 Категории технологий для чекбоксов
+    TECH_CATEGORIES = {
+        "Языки программирования": ["Python", "JavaScript", "Java", "C#", "Go"],
+        "Фреймворки": ["Django", "Flask", "React", "Angular", "Vue"],
+        "Базы данных": ["PostgreSQL", "MySQL", "SQLite", "MongoDB", "Redis"],
+        "Инструменты": ["Git", "Docker", "VS Code", "Postman", "Jira"],
+        "DevOps": ["Jenkins", "GitLab CI", "Kubernetes", "Ansible", "Terraform"],
+        "UI/UX": ["Figma", "Adobe XD", "Sketch", "InVision", "Balsamiq"],
+        "Безопасность": ["OAuth", "JWT", "SSL", "OpenSSL", "HashiCorp Vault"],
+    }
+
+    # 🔹 Динамически создаем поля MultipleChoiceField
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for category, tech_list in self.TECH_CATEGORIES.items():
+            self.fields[category] = forms.MultipleChoiceField(
+                choices=[(t, t) for t in tech_list],
+                widget=forms.CheckboxSelectMultiple,
+                required=False,
+                label=category
+            )
+
+    # Валидация: хотя бы один проект и одна технология
     def clean(self):
         cleaned_data = super().clean()
-        existing_project = cleaned_data.get("existing_project")
-        new_project = cleaned_data.get("new_project")
-        existing_technology = cleaned_data.get("existing_technology")
-        new_technology = cleaned_data.get("new_technology")
-        new_category = cleaned_data.get("new_category")
-
-        if not (existing_project or new_project):
-            raise forms.ValidationError("Нужно выбрать существующий проект или ввести новый.")
-
-        if not (existing_technology or new_technology):
-            raise forms.ValidationError("Нужно выбрать существующую технологию или ввести новую.")
-
-        if new_technology and not new_category:
-            raise forms.ValidationError("Если вводите новую технологию, укажите её категорию.")
+        if not cleaned_data.get("existing_project") and not cleaned_data.get("new_project"):
+            raise forms.ValidationError("Выберите существующий проект или введите новый.")
+        any_tech_selected = any(cleaned_data.get(cat) for cat in self.TECH_CATEGORIES)
+        if not any_tech_selected:
+            raise forms.ValidationError("Выберите хотя бы одну технологию.")

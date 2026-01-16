@@ -1,38 +1,40 @@
-from django.shortcuts import render, redirect
-from .models import Project, Technology, ProjectTechnology
+from django.shortcuts import render
+from django.http import JsonResponse
+from .models import ProjectTechnology
 from .forms import ProjectTechnologyForm
+import requests
 from collections import Counter
 
 def index(request):
-    if request.method == "POST":
-        form = ProjectTechnologyForm(request.POST)
-        if form.is_valid():
-            # Определяем проект
-            project = form.cleaned_data["existing_project"]
-            if not project:
-                project_name = form.cleaned_data["new_project"]
-                project, _ = Project.objects.get_or_create(name=project_name)
+    form = ProjectTechnologyForm()
 
-            # Определяем технологию
-            technology = form.cleaned_data["existing_technology"]
-            if not technology:
-                tech_name = form.cleaned_data["new_technology"]
-                category = form.cleaned_data["new_category"]
-                technology, _ = Technology.objects.get_or_create(name=tech_name, defaults={"category": category})
-
-            # Создаем связь
-            ProjectTechnology.objects.get_or_create(project=project, technology=technology)
-
-            return redirect("index")
-    else:
-        form = ProjectTechnologyForm()
-
-    # Для таблицы популярности технологий
-    project_techs = ProjectTechnology.objects.all()
-    all_technologies = [pt.technology.name for pt in project_techs]
-    technology_stats = dict(Counter(all_technologies))
+    # 🔹 Локальная статистика технологий
+    all_techs = [pt.technology.name for pt in ProjectTechnology.objects.all()]
+    tech_stats = dict(Counter(all_techs))
 
     return render(request, "analyzer/index.html", {
         "form": form,
-        "technology_stats": technology_stats
+        "tech_stats": tech_stats  # только локальные технологии
     })
+
+def github_stats(request):
+    """
+    Возвращаем JSON с GitHub-популярностью только для технологий из локальной базы
+    """
+    local_techs = list(ProjectTechnology.objects.values_list("technology__name", flat=True).distinct())
+    github_counts = {}
+    headers = {"Accept": "application/vnd.github.v3+json"}
+
+    for tech in local_techs:
+        try:
+            response = requests.get(
+                f"https://api.github.com/search/repositories?q={tech}&sort=stars&order=desc",
+                headers=headers,
+                timeout=5
+            )
+            data = response.json()
+            github_counts[tech] = data.get("total_count", 0)
+        except Exception:
+            github_counts[tech] = None  # если не получилось, показываем None (Загрузка…)
+
+    return JsonResponse(github_counts)

@@ -4,11 +4,14 @@ from .models import Project, Technology, ProjectTechnology
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
     list_display = ('name', 'description')
+    search_fields = ('name', 'description')
 
 @admin.register(Technology)
 class TechnologyAdmin(admin.ModelAdmin):
     list_display = ('name', 'category')
+    search_fields = ('name', 'category')
 
 @admin.register(ProjectTechnology)
 class ProjectTechnologyAdmin(admin.ModelAdmin):
     list_display = ('project', 'technology')
+    search_fields = ('project__name', 'technology__name')
