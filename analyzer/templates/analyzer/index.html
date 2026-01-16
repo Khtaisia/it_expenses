@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Анализ технологических стеков IT-проектов</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            color: #333;
+        }
+        table {
+            border-collapse: collapse;
+            width: 60%;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #aaa;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #ddd;
+        }
+        tr:nth-child(even) {
+            background-color: #eee;
+        }
+    </style>
+</head>
+<body>
+    <h1>Анализ технологических стеков IT-проектов</h1>
+    <p>Этот веб-сервис предназначен для анализа популярных комбинаций инструментов, используемых в IT-проектах.</p>
+
+    <table>
+        <tr>
+            <th>Технология</th>
+            <th>Количество проектов</th>
+        </tr>
+        {% for tech, count in technology_stats.items %}
+        <tr>
+            <td>{{ tech }}</td>
+            <td>{{ count }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="2">Нет данных</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
