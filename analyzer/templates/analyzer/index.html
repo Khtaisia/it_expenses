@@ -79,7 +79,23 @@
         </form>
     </div>
 
-    <!-- 🔹 Таблица с локальными данными и GitHub -->
+    <!-- 🔹 ФИЛЬТРАЦИЯ ПО ПРОЕКТУ -->
+    <form method="get" class="row mb-4">
+        <div class="col-md-6">
+            <label class="form-label">Фильтр по проекту</label>
+            <select name="project" class="form-select" onchange="this.form.submit()">
+                <option value="">Все проекты</option>
+                {% for project in projects %}
+                    <option value="{{ project.id }}"
+                        {% if project.id|stringformat:"s" == request.GET.project %}selected{% endif %}>
+                        {{ project.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+    </form>
+
+    <!-- 🔹 Таблица -->
     <h2 class="text-center mb-3">Популярность технологий</h2>
     <table class="table table-striped table-bordered" id="tech-table">
         <thead class="table-dark">
@@ -103,6 +119,7 @@
             {% endfor %}
         </tbody>
     </table>
+
     <p class="text-muted text-end">Данные взяты с API GitHub</p>
 
     <!-- 🔹 График -->
@@ -116,13 +133,11 @@ async function loadGithubStats() {
     const response = await fetch("{% url 'github_stats' %}");
     const data = await response.json();
 
-    // Обновляем GitHub колонку в таблице
     document.querySelectorAll("#tech-table tbody tr").forEach(row => {
         const tech = row.cells[0].innerText;
         row.cells[2].innerText = data[tech] ?? "Загрузка...";
     });
 
-    // Строим график только по локальным технологиям
     const labels = [{% for tech in tech_stats.keys %}"{{ tech }}",{% endfor %}];
     const valuesLocal = [{% for tech, count in tech_stats.items %}{{ count }},{% endfor %}];
     const valuesGitHub = labels.map(tech => data[tech] ?? 0);
@@ -133,23 +148,12 @@ async function loadGithubStats() {
         data: {
             labels: labels,
             datasets: [
-                {
-                    label: 'Локально',
-                    data: valuesLocal,
-                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                    borderWidth: 1
-                },
-                {
-                    label: 'GitHub',
-                    data: valuesGitHub,
-                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                    borderWidth: 1
-                }
+                { label: 'Локально', data: valuesLocal },
+                { label: 'GitHub', data: valuesGitHub }
             ]
         },
         options: {
             responsive: true,
-            plugins: { legend: { position: 'top' } },
             scales: { y: { beginAtZero: true } }
         }
     });
