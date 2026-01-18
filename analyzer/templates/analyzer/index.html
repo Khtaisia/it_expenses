@@ -94,9 +94,13 @@
 
     <p class="text-muted text-end">Данные взяты с API GitHub</p>
 
-    <!-- 🔹 График -->
+    <!-- 🔹 График 1 -->
     <h2 class="text-center mt-5 mb-3">График популярности технологий</h2>
     <canvas id="techChart" height="120"></canvas>
+
+    <!-- 🔹 НОВОЕ: График 2 -->
+    <h2 class="text-center mt-5 mb-3">Популярность технологий по категориям</h2>
+    <canvas id="categoryChart" height="120"></canvas>
 
 {% endblock %}
 
@@ -123,6 +127,28 @@ async function loadGithubStats() {
             datasets: [
                 { label: 'Локально', data: valuesLocal },
                 { label: 'GitHub', data: valuesGitHub }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+
+    // 🔹 НОВОЕ: график по категориям
+    const categoryLabels = [{% for cat in category_stats.keys %}"{{ cat }}",{% endfor %}];
+    const categoryValues = [{% for cat, count in category_stats.items %}{{ count }},{% endfor %}];
+
+    const ctxCategory = document.getElementById('categoryChart').getContext('2d');
+    new Chart(ctxCategory, {
+        type: 'bar',
+        data: {
+            labels: categoryLabels,
+            datasets: [
+                {
+                    label: 'Количество технологий',
+                    data: categoryValues
+                }
             ]
         },
         options: {

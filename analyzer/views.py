@@ -20,20 +20,25 @@ def index(request):
                     name=new_project_name
                 )
 
-            # 2️⃣ Сохраняем выбранные технологии
+            # 2️⃣ Сохраняем выбранные технологии с категорией
             for category in form.TECH_CATEGORIES:
                 selected_techs = form.cleaned_data.get(category)
                 if selected_techs:
                     for tech_name in selected_techs:
-                        tech_obj, _ = Technology.objects.get_or_create(
-                            name=tech_name
+                        tech_obj, created = Technology.objects.get_or_create(
+                            name=tech_name,
+                            defaults={"category": category}  # ← сохраняем категорию
                         )
+                        if not created and tech_obj.category != category:
+                            # Обновляем категорию, если она отличается
+                            tech_obj.category = category
+                            tech_obj.save()
+
                         ProjectTechnology.objects.get_or_create(
                             project=project,
                             technology=tech_obj
                         )
 
-            # redirect — good practice
             return redirect("index")
     else:
         form = ProjectTechnologyForm()
@@ -48,17 +53,31 @@ def index(request):
             project_id=selected_project_id
         )
 
-    # ---------- АГРЕГАЦИЯ + СОРТИРОВКА ----------
+    # ---------- ГРАФИК 1: ПО ТЕХНОЛОГИЯМ ----------
     tech_stats_qs = (
         project_tech_qs
         .values("technology__name")
         .annotate(count=Count("technology"))
-        .order_by("-count")  # сортировка по популярности
+        .order_by("-count")
     )
 
     tech_stats = {
         item["technology__name"]: item["count"]
         for item in tech_stats_qs
+    }
+
+    # ---------- ГРАФИК 2: ПО КАТЕГОРИЯМ ----------
+    category_stats_qs = (
+        project_tech_qs
+        .values("technology__category")
+        .annotate(count=Count("technology"))
+        .order_by("-count")
+    )
+
+    category_stats = {
+        item["technology__category"]: item["count"]
+        for item in category_stats_qs
+        if item["technology__category"]
     }
 
     return render(
@@ -67,6 +86,7 @@ def index(request):
         {
             "form": form,
             "tech_stats": tech_stats,
+            "category_stats": category_stats,  # ← НОВОЕ
             "projects": Project.objects.all(),
             "selected_project_id": selected_project_id,
         }
