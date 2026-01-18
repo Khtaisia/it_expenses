@@ -98,7 +98,7 @@
     <h2 class="text-center mt-5 mb-3">График популярности технологий</h2>
     <canvas id="techChart" height="120"></canvas>
 
-    <!-- 🔹 НОВОЕ: График 2 -->
+    <!-- 🔹 График 2 (категории) -->
     <h2 class="text-center mt-5 mb-3">Популярность технологий по категориям</h2>
     <canvas id="categoryChart" height="120"></canvas>
 
@@ -115,6 +115,7 @@ async function loadGithubStats() {
         row.cells[2].innerText = data[tech] ?? "Загрузка...";
     });
 
+    // 🔹 График 1: по технологиям
     const labels = [{% for tech in tech_stats.keys %}"{{ tech }}",{% endfor %}];
     const valuesLocal = [{% for tech, count in tech_stats.items %}{{ count }},{% endfor %}];
     const valuesGitHub = labels.map(tech => data[tech] ?? 0);
@@ -135,7 +136,7 @@ async function loadGithubStats() {
         }
     });
 
-    // 🔹 НОВОЕ: график по категориям
+    // 🔹 График 2: по категориям
     const categoryLabels = [{% for cat in category_stats.keys %}"{{ cat }}",{% endfor %}];
     const categoryValues = [{% for cat, count in category_stats.items %}{{ count }},{% endfor %}];
 
@@ -145,10 +146,7 @@ async function loadGithubStats() {
         data: {
             labels: categoryLabels,
             datasets: [
-                {
-                    label: 'Количество технологий',
-                    data: categoryValues
-                }
+                { label: 'Количество технологий', data: categoryValues }
             ]
         },
         options: {

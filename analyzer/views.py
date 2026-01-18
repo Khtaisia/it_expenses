@@ -86,7 +86,7 @@ def index(request):
         {
             "form": form,
             "tech_stats": tech_stats,
-            "category_stats": category_stats,  # ← НОВОЕ
+            "category_stats": category_stats,
             "projects": Project.objects.all(),
             "selected_project_id": selected_project_id,
         }
@@ -120,3 +120,27 @@ def github_stats(request):
             github_counts[tech] = None
 
     return JsonResponse(github_counts)
+
+
+# =========================================
+# 🔹 API для категорий (доп. баллы)
+# =========================================
+def categories_stats_api(request):
+    """
+    Возвращает JSON с популярностью категорий технологий
+    только для локальных проектов
+    """
+    category_stats_qs = (
+        ProjectTechnology.objects
+        .values("technology__category")
+        .annotate(count=Count("technology"))
+        .order_by("-count")
+    )
+
+    category_stats = {
+        item["technology__category"]: item["count"]
+        for item in category_stats_qs
+        if item["technology__category"]
+    }
+
+    return JsonResponse(category_stats)
