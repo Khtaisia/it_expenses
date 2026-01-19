@@ -2,17 +2,17 @@
 
 {% block content %}
 
-    <!-- Заголовок -->
+
     <h1 class="text-center mb-4">Анализ технологических стеков IT-проектов</h1>
 
-    <!-- 🔹 Блок добавления технологий -->
+
     <div class="highlight-card mb-5">
         <h3 class="text-center mb-3 text-primary">Добавить технологии к проекту</h3>
 
         <form method="post">
             {% csrf_token %}
 
-            <!-- Выбор проекта -->
+
             <div class="project-row mb-3">
                 <div class="project-col">
                     {{ form.existing_project.label_tag }}
@@ -27,7 +27,6 @@
 
             <hr>
 
-            <!-- Категории технологий -->
             <div class="row">
                 {% for field in form %}
                     {% if field.name not in "existing_project new_project" %}
@@ -51,7 +50,7 @@
         </form>
     </div>
 
-    <!-- 🔹 ФИЛЬТРАЦИЯ ПО ПРОЕКТУ -->
+
     <form method="get" class="row mb-4">
         <div class="col-md-6">
             <label class="form-label">Фильтр по проекту</label>
@@ -67,7 +66,7 @@
         </div>
     </form>
 
-    <!-- 🔹 Таблица -->
+
     <h2 class="text-center mb-3">Популярность технологий</h2>
     <table class="table table-striped table-bordered" id="tech-table">
         <thead class="table-dark">
@@ -94,11 +93,11 @@
 
     <p class="text-muted text-end">Данные взяты с API GitHub</p>
 
-    <!-- 🔹 График 1 -->
+
     <h2 class="text-center mt-5 mb-3">График популярности технологий</h2>
     <canvas id="techChart" height="120"></canvas>
 
-    <!-- 🔹 График 2 (категории) -->
+
     <h2 class="text-center mt-5 mb-3">Популярность технологий по категориям</h2>
     <canvas id="categoryChart" height="120"></canvas>
 
@@ -115,7 +114,7 @@ async function loadGithubStats() {
         row.cells[2].innerText = data[tech] ?? "Загрузка...";
     });
 
-    // 🔹 График 1: по технологиям
+
     const labels = [{% for tech in tech_stats.keys %}"{{ tech }}",{% endfor %}];
     const valuesLocal = [{% for tech, count in tech_stats.items %}{{ count }},{% endfor %}];
     const valuesGitHub = labels.map(tech => data[tech] ?? 0);
@@ -136,7 +135,7 @@ async function loadGithubStats() {
         }
     });
 
-    // 🔹 График 2: по категориям
+
     const categoryLabels = [{% for cat in category_stats.keys %}"{{ cat }}",{% endfor %}];
     const categoryValues = [{% for cat, count in category_stats.items %}{{ count }},{% endfor %}];
 

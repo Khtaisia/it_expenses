@@ -7,11 +7,9 @@ from django.db.models import Count
 
 
 def index(request):
-    # ---------- СОХРАНЕНИЕ ДАННЫХ ----------
     if request.method == "POST":
         form = ProjectTechnologyForm(request.POST)
         if form.is_valid():
-            # 1️⃣ Определяем проект
             project = form.cleaned_data["existing_project"]
             new_project_name = form.cleaned_data["new_project"]
 
@@ -20,17 +18,15 @@ def index(request):
                     name=new_project_name
                 )
 
-            # 2️⃣ Сохраняем выбранные технологии с категорией
             for category in form.TECH_CATEGORIES:
                 selected_techs = form.cleaned_data.get(category)
                 if selected_techs:
                     for tech_name in selected_techs:
                         tech_obj, created = Technology.objects.get_or_create(
                             name=tech_name,
-                            defaults={"category": category}  # ← сохраняем категорию
+                            defaults={"category": category}
                         )
                         if not created and tech_obj.category != category:
-                            # Обновляем категорию, если она отличается
                             tech_obj.category = category
                             tech_obj.save()
 
@@ -43,7 +39,7 @@ def index(request):
     else:
         form = ProjectTechnologyForm()
 
-    # ---------- ФИЛЬТРАЦИЯ ----------
+
     selected_project_id = request.GET.get("project")
 
     project_tech_qs = ProjectTechnology.objects.all()
@@ -53,7 +49,7 @@ def index(request):
             project_id=selected_project_id
         )
 
-    # ---------- ГРАФИК 1: ПО ТЕХНОЛОГИЯМ ----------
+
     tech_stats_qs = (
         project_tech_qs
         .values("technology__name")
@@ -66,7 +62,7 @@ def index(request):
         for item in tech_stats_qs
     }
 
-    # ---------- ГРАФИК 2: ПО КАТЕГОРИЯМ ----------
+
     category_stats_qs = (
         project_tech_qs
         .values("technology__category")
@@ -122,9 +118,7 @@ def github_stats(request):
     return JsonResponse(github_counts)
 
 
-# =========================================
-# 🔹 API для категорий (доп. баллы)
-# =========================================
+
 def categories_stats_api(request):
     """
     Возвращает JSON с популярностью категорий технологий

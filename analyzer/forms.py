@@ -13,7 +13,7 @@ class ProjectTechnologyForm(forms.Form):
         label="Или ввести новый проект"
     )
 
-    # 🔹 Категории технологий для чекбоксов
+
     TECH_CATEGORIES = {
         "Языки программирования": ["Python", "JavaScript", "Java", "C#", "Go"],
         "Фреймворки": ["Django", "Flask", "React", "Angular", "Vue"],
@@ -24,7 +24,7 @@ class ProjectTechnologyForm(forms.Form):
         "Безопасность": ["OAuth", "JWT", "SSL", "OpenSSL", "HashiCorp Vault"],
     }
 
-    # 🔹 Динамически создаем поля MultipleChoiceField
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for category, tech_list in self.TECH_CATEGORIES.items():
@@ -35,7 +35,7 @@ class ProjectTechnologyForm(forms.Form):
                 label=category
             )
 
-    # Валидация: хотя бы один проект и одна технология
+
     def clean(self):
         cleaned_data = super().clean()
         if not cleaned_data.get("existing_project") and not cleaned_data.get("new_project"):
